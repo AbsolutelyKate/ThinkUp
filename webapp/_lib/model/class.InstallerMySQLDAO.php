@@ -144,6 +144,7 @@ class InstallerMySQLDAO extends PDODAO implements InstallerDAO  {
         $table_prefix = $config->getValue('table_prefix');
         $sql_list = preg_split('/;/',$insql);
         $cnt = 0;
+        $not_first= false;
         foreach($sql_list as $sql) {
             if (preg_match('/^\s+$/', $sql) || $sql == '') { # skip empty lines
                 continue;
@@ -188,6 +189,23 @@ class InstallerMySQLDAO extends PDODAO implements InstallerDAO  {
                     continue;
                 }
             }
+            $rollback_match;
+            // if we are a sql line being rerun after a fail
+            if ($cnt > 0 && $not_first == false && preg_match('/rollback=(\d+)/', $sql, $rollback_match)) {
+                $rollback = $rollback_match[1];
+                for($i = $rollback - 1; $i >= 0; $i--) {
+                    $roll_back_sql = $sql_list[$cnt - $i];
+                    $ps = $this->execute($roll_back_sql);
+                    $error_array = $ps->errorInfo();
+                    if ($error_array[0] > 0) {
+                        error_log($error_array[0]);
+                        throw new Exception("migration sql error for $sql: " . $sql);
+                    }
+                    $ps->closeCursor();
+                }
+            }
+            $sql = preg_replace('/#.*$/', '', $sql); // filter any rollback comments
+
             $ps = $this->execute($sql);
             $error_array = $ps->errorInfo();
             if ($error_array[0] > 0) {
@@ -203,6 +221,7 @@ class InstallerMySQLDAO extends PDODAO implements InstallerDAO  {
                 if ($this->getInsertCount($stmt) != 1) {
                     throw new Exception("Unable to add record to completed_migrations table: " . $migration_sql);
                 }
+                $not_first = true;
             }
         }
     }

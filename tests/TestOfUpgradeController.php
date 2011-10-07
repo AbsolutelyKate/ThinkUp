@@ -256,6 +256,59 @@ class TestOfUpgradeController extends ThinkUpUnitTestCase {
         $this->assertEqual($data2[2]['date_ran'], $data[2]['date_ran']);
     }
 
+    public function testRunNewFailedMigration() {
+        $this->simulateLogin('me@example.com', true);
+
+        $controller = new UpgradeController(true);
+        $this->newMigrationFiles2('some_stuff2', $date = false, $bad_sql = true);
+
+        $db_version = UpgradeController::getCurrentDBVersion($cached = false);
+        $list = $controller->getMigrationList($db_version);
+        $this->assertEqual(count($list), 1);
+        $this->assertTrue($list[0]['new_migration']);
+        $this->assertPattern("/^2011-09-21_some_stuff2_v\d+\.\d+\.sql$/",$list[0]['filename']);
+
+        $_GET['migration_index'] = 1;
+        $results = $controller->go();
+        $obj = json_decode($results);
+        $this->assertFalse($obj->processed);
+
+        $stmt = $this->pdo->query("select * from tu_completed_migrations");
+        $data2 = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->assertEqual(5, count($data2));
+        $stmt = $this->pdo->query("desc " . $this->table_prefix . "test3");
+        $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->fetch(PDO::FETCH_ASSOC);
+        $this->assertFalse($stmt->fetch(PDO::FETCH_ASSOC)); // no user_id column
+        $stmt = $this->pdo->query("select count(*) as count from  " . $this->table_prefix . "test3");
+        $data = $stmt->fetch();
+        $this->assertEqual(3, $data['count']);
+
+        $controller = new UpgradeController(true);
+        $this->newMigrationFiles2('some_stuff2', $date = false, $bad_sql = false);
+        $results = $controller->go();
+        $obj = json_decode($results);
+        $this->assertTrue($obj->processed);
+        $stmt = $this->pdo->query("select * from tu_completed_migrations");
+        $data2 = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->assertEqual(9, count($data2));
+
+        $stmt = $this->pdo->query("desc " . $this->table_prefix . "test3");
+        $stmt->fetch(PDO::FETCH_ASSOC);
+        $stmt->fetch(PDO::FETCH_ASSOC);
+        $this->assertTrue($stmt->fetch(PDO::FETCH_ASSOC)); // has a user_id column
+
+        $stmt = $this->pdo->query("select * from " . $this->table_prefix . "test3 where value = 8");
+        $data2 = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->assertEqual($data2[0]['value'], '8');
+        $this->assertEqual($data2[0]['user_id'], '1003');
+
+        $stmt = $this->pdo->query("select * from " . $this->table_prefix . "test3 where value = 5");
+        $data2 = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $this->assertEqual($data2[0]['value'], '5');
+        $this->assertEqual($data2[0]['user_id'], '1000');
+
+    }
     public function testGenerateUpgradeToken() {
         $this->simulateLogin('me@example.com');
         $controller = new UpgradeController(true);
@@ -754,5 +807,28 @@ class TestOfUpgradeController extends ThinkUpUnitTestCase {
             file_put_contents($migration1, $msql);
         }
         $this->test_migrations[] = $migration1;
+    }
+    private function newMigrationFiles2($name, $date = false, $bad_sql = false) {
+        $config = Config::getInstance();
+        $app_version = $config->getValue('THINKUP_VERSION');
+        if (! $date) {
+            $date = '2011-09-21';
+        }
+        $migration_version = $app_version;
+        $migration_version = $app_version;
+        $migration_test3 = $this->migrations_test_dir . $this->migrations_file3;
+        $migration3 = $this->migrations_dir . $date . '_' . $name;
+        $migration3 .= '_v' . $migration_version;
+        $migration3 .= '.sql';
+        if (file_exists($migration3)) {
+            unlink($migration3);
+        }
+        copy($migration_test3, $migration3);
+        if ($bad_sql) {
+            $msql = file_get_contents($migration3);
+            $msql = preg_replace("/INSERT INTO tu_test3_b16/", 'INSERT INTO tu_test3_b16_badtable', $msql);
+            file_put_contents($migration3, $msql);
+        }
+        $this->test_migrations[] = $migration3;
     }
 }
