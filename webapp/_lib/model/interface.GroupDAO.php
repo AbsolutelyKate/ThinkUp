@@ -27,24 +27,21 @@
  * @copyright 2011 SwellPath, Inc.
  * @author Christian G. Warden <cwarden[at]xerus[dot]org>
  */
-
 interface GroupDAO {
     /**
-     * Checks weather a given group exists in storage.
+     * Checks whether a given group exists in storage.
      * @param int $group_id
      * @param str $network
-     * @param bool $is_active Whether or not relationship should be active only
-     * @return bool true if follow exists
+     * @param bool $is_active Whether or not group should be active only
+     * @return bool true if group exists
      */
-    public function groupExists($group_id, $network, $is_active=false);
-
+    public function isGroupInStorage($group_id, $network, $is_active=false);
     /**
      * Update existing or insert new group
      * @param Group $group
-     * @return int Total number of affected rows
+     * @return bool Whether or not a group was updated or inserted
      */
-    public function updateGroup($group);
-
+    public function updateOrInsertGroup(Group $group);
     /**
      * Updates 'last seen' in storage.
      * @param str $group_id
@@ -53,22 +50,19 @@ interface GroupDAO {
      * @return int update count
      */
     public function update($group_id, $group_name, $network);
-
     /**
      * Deactivates a group in storage.
      * @param str $group_id
      * @param str $network
      * @return int update count
      */
-    public function deactivate($follower_id, $network);
-
+    public function deactivate($group_id, $network);
     /**
      * Adds a group to storage
      * @param str $group_id
      * @param str $group_name
      * @param str $network
-     * @return int insert count
+     * @return int Inserted ID
      */
-    public function insert($follower_id, $group_name, $network);
-
+    public function insert($group_id, $group_name, $network);
 }

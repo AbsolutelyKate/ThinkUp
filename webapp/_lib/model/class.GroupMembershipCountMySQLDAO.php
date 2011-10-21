@@ -44,12 +44,12 @@ class GroupMembershipCountMySQLDAO extends PDODAO implements GroupMembershipCoun
         return $this->getInsertCount($ps);
     }
 
-    public function recordCurrentCount($network_user_id, $network) {
+    public function updateCount($network_user_id, $network) {
         $q  = "INSERT INTO #prefix#group_member_count ";
         $q .= "(member_user_id, network, date, count) ";
         $q .= "SELECT :network_user_id, :network, NOW(), COUNT(group_id) ";
         $q .= "FROM #prefix#group_members WHERE member_user_id = :network_user_id ";
-        $q .= "AND network = :network AND active = 1";
+        $q .= "AND network = :network AND is_active = 1";
         $vars = array(
             ':network_user_id'=>(string) $network_user_id,
             ':network'=>$network,
@@ -150,7 +150,7 @@ class GroupMembershipCountMySQLDAO extends PDODAO implements GroupMembershipCoun
                 $i = $i+1;
             }
             $y_axis[$num_y_axis_points] = $max_count;
-            $milestone = $this->predictNextMilestoneDate(intval($history_rows[sizeof($history_rows)-1]['count']),
+            $milestone = Utils::predictNextMilestoneDate(intval($history_rows[sizeof($history_rows)-1]['count']),
             $trend);
             if (isset($milestone)) {
                 $milestone['units_of_time'] = $units;
@@ -170,56 +170,5 @@ class GroupMembershipCountMySQLDAO extends PDODAO implements GroupMembershipCoun
         }
         return array('history'=>$history, 'percentages'=>$percentages, 'y_axis'=>$y_axis, 'trend'=>$trend,
         'milestone'=> $milestone, 'max_count'=>$max_count, 'min_count'=>$min_count);
-    }
-
-    /**
-     * Calculate the number of time units it will take to reach the next group count milestone given
-     * an upward trend.
-     * @param int $group_count
-     * @param int $trend
-     * @return array 'next_milestone'=> int, 'will_take'=>int
-     */
-    private function predictNextMilestoneDate($group_count, $trend) {
-        if ($trend > 0 ) {
-            $milestones = array(
-            1000000,
-            750000,
-            500000,
-            300000,
-            250000,
-            200000,
-            150000,
-            100000,
-            50000,
-            25000,
-            10000,
-            5000,
-            1000,
-            500,
-            200,
-            100,
-            50,
-            10
-            );
-
-            $goal_count = 0;
-            foreach ($milestones as $milestone) {
-                if ($group_count < $milestone) {
-                    $goal_count = $milestone;
-                }
-            }
-            if ($goal_count == 0) { //group count is over a million
-                $float_val = $group_count/10000000;
-                $goal_count = round($float_val, 1);
-                $goal_count = $goal_count * 10000000;
-                if ($group_count > $goal_count) {
-                    $goal_count = $goal_count + 500000;
-                }
-            }
-            $prediction = intval(round(($goal_count - $group_count)/$trend));
-            return array('next_milestone'=>$goal_count, 'will_take'=>$prediction);
-        } else {
-            return null;
-        }
     }
 }

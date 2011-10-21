@@ -58,27 +58,27 @@ class TestOfFollowerCountMySQLDAO extends ThinkUpUnitTestCase {
         $todays_day_of_the_week = date('w');
         $this->debug("It's currently the ".$todays_day_of_the_week." day of the week");
         if ($todays_day_of_the_week == 0 ) {
-            $follower_count = array('network_user_id'=>930061, 'network'=>'twitter', 'date'=>'-2d', 'count'=>140);
+            $follower_count = array('network_user_id'=>'930061', 'network'=>'twitter', 'date'=>'-2d', 'count'=>14);
             $builder1 = FixtureBuilder::build('follower_count', $follower_count);
 
-            $follower_count = array('network_user_id'=>930061, 'network'=>'twitter', 'date'=>'-3d', 'count'=>100);
+            $follower_count = array('network_user_id'=>'930061', 'network'=>'twitter', 'date'=>'-3d', 'count'=>10);
             $builder2 = FixtureBuilder::build('follower_count', $follower_count);
 
-            $follower_count = array('network_user_id'=>930061, 'network'=>'twitter', 'date'=>'-4d', 'count'=>120);
+            $follower_count = array('network_user_id'=>'930061', 'network'=>'twitter', 'date'=>'-4d', 'count'=>12);
             $builder3 = FixtureBuilder::build('follower_count', $follower_count);
         } else {
-            $follower_count = array('network_user_id'=>930061, 'network'=>'twitter', 'date'=>'-1d', 'count'=>140);
+            $follower_count = array('network_user_id'=>'930061', 'network'=>'twitter', 'date'=>'-1d', 'count'=>14);
             $builder1 = FixtureBuilder::build('follower_count', $follower_count);
 
-            $follower_count = array('network_user_id'=>930061, 'network'=>'twitter', 'date'=>'-2d', 'count'=>100);
+            $follower_count = array('network_user_id'=>'930061', 'network'=>'twitter', 'date'=>'-2d', 'count'=>10);
             $builder2 = FixtureBuilder::build('follower_count', $follower_count);
 
-            $follower_count = array('network_user_id'=>930061, 'network'=>'twitter', 'date'=>'-3d', 'count'=>120);
+            $follower_count = array('network_user_id'=>'930061', 'network'=>'twitter', 'date'=>'-3d', 'count'=>12);
             $builder3 = FixtureBuilder::build('follower_count', $follower_count);
         }
 
         $dao = new FollowerCountMySQLDAO();
-        $result = $dao->getHistory(930061, 'twitter', 'DAY', 3);
+        $result = $dao->getHistory('930061', 'twitter', 'DAY', 3);
         $this->assertEqual(sizeof($result), 7, '7 sets of data returned--history, percentages, Y axis, trend, '.
         'milestone, and maximum/minimum counts');
 
@@ -88,22 +88,22 @@ class TestOfFollowerCountMySQLDAO extends ThinkUpUnitTestCase {
 
         if ($todays_day_of_the_week == 0 ) {
             $date_ago = date ($format, strtotime('-4 day'.$date));
-            $this->assertEqual($result['history'][$date_ago], 120);
+            $this->assertEqual($result['history'][$date_ago], 12);
 
             $date_ago = date ($format, strtotime('-3 day'.$date));
-            $this->assertEqual($result['history'][$date_ago], 100);
+            $this->assertEqual($result['history'][$date_ago], 10);
 
             $date_ago = date ($format, strtotime('-2 day'.$date));
-            $this->assertEqual($result['history'][$date_ago], 140);
+            $this->assertEqual($result['history'][$date_ago], 14);
         } else  {
             $date_ago = date ($format, strtotime('-3 day'.$date));
-            $this->assertEqual($result['history'][$date_ago], 120);
+            $this->assertEqual($result['history'][$date_ago], 12);
 
             $date_ago = date ($format, strtotime('-2 day'.$date));
-            $this->assertEqual($result['history'][$date_ago], 100);
+            $this->assertEqual($result['history'][$date_ago], 10);
 
             $date_ago = date ($format, strtotime('-1 day'.$date));
-            $this->assertEqual($result['history'][$date_ago], 140);
+            $this->assertEqual($result['history'][$date_ago], 14);
         }
 
         //check percentages
@@ -114,18 +114,18 @@ class TestOfFollowerCountMySQLDAO extends ThinkUpUnitTestCase {
 
         //check Y-axis
         $this->assertEqual(sizeof($result['y_axis']), 5, '5 Y axis points returned');
-        $this->assertEqual($result['y_axis'][0], 100);
-        $this->assertEqual($result['y_axis'][1], 110);
-        $this->assertEqual($result['y_axis'][2], 120);
-        $this->assertEqual($result['y_axis'][3], 130);
-        $this->assertEqual($result['y_axis'][4], 140);
+        $this->assertEqual($result['y_axis'][0], 10);
+        $this->assertEqual($result['y_axis'][1], 11);
+        $this->assertEqual($result['y_axis'][2], 12);
+        $this->assertEqual($result['y_axis'][3], 13);
+        $this->assertEqual($result['y_axis'][4], 14);
 
         //check trend
-        $this->assertEqual($result['trend'], 7);
+        $this->assertEqual($result['trend'], 1);
 
         //check milestone
-        //latest follower count is 140, next milestone is 1,000 followers
-        //with a 7+/day trend, this should take 123 days
+        //latest follower count is 14, next milestone is 100 followers
+        //with a 1+/day trend, this should take 86 days
         //that's over the "don't feel bad about yourself" threshold of 10, so milestone should be null
         $this->assertNull($result['milestone']);
     }

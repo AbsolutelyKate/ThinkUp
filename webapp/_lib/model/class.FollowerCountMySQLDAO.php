@@ -134,7 +134,7 @@ class FollowerCountMySQLDAO extends PDODAO implements FollowerCountDAO {
                 $i = $i+1;
             }
             $y_axis[$num_y_axis_points] = $max_count;
-            $milestone = $this->predictNextMilestoneDate(intval($history_rows[sizeof($history_rows)-1]['count']),
+            $milestone = Utils::predictNextMilestoneDate(intval($history_rows[sizeof($history_rows)-1]['count']),
             $trend);
             if (isset($milestone)) {
                 $milestone['units_of_time'] = $units;
@@ -154,51 +154,5 @@ class FollowerCountMySQLDAO extends PDODAO implements FollowerCountDAO {
         }
         return array('history'=>$history, 'percentages'=>$percentages, 'y_axis'=>$y_axis, 'trend'=>$trend,
         'milestone'=> $milestone, 'max_count'=>$max_count, 'min_count'=>$min_count);
-    }
-
-    /**
-     * Calculate the number of time units it will take to reach the next follower count milestone given
-     * an upward trend.
-     * @param int $follower_count
-     * @param int $trend
-     * @return array 'next_milestone'=> int, 'will_take'=>int
-     */
-    private function predictNextMilestoneDate($follower_count, $trend) {
-        if ($trend > 0 ) {
-            $milestones = array(
-            1000000,
-            750000,
-            500000,
-            300000,
-            250000,
-            200000,
-            150000,
-            100000,
-            50000,
-            25000,
-            10000,
-            5000,
-            1000
-            );
-
-            $goal_count = 0;
-            foreach ($milestones as $milestone) {
-                if ($follower_count < $milestone) {
-                    $goal_count = $milestone;
-                }
-            }
-            if ($goal_count == 0) { //follower count is over a million
-                $float_val = $follower_count/10000000;
-                $goal_count = round($float_val, 1);
-                $goal_count = $goal_count * 10000000;
-                if ($follower_count > $goal_count) {
-                    $goal_count = $goal_count + 500000;
-                }
-            }
-            $prediction = intval(round(($goal_count - $follower_count)/$trend));
-            return array('next_milestone'=>$goal_count, 'will_take'=>$prediction);
-        } else {
-            return null;
-        }
     }
 }

@@ -33,46 +33,44 @@
  */
 class Group {
     /**
-     *
-     * @var int
+     * @var int Internal unique ID.
      */
     var $id;
     /**
-     *
-     * @var str
+     * @var str Group/list ID on the source network.
      */
     var $group_id;
     /**
-     *
-     * @var str
+     * @var str Originating network in lower case, i.e., twitter or facebook.
+     */
+    var $network;
+    /**
+     * @var str Name of the group or list on the source network.
      */
     var $group_name;
     /**
-     *
-     * @var str Default 'twitter'
+     * @var bool Whether or not the group is active.
      */
-    var $network;
-
+    var $is_active;
     /**
-     * Constructor
-     * @param array $val User key/value pairs
-     * @param str $found_in Where user was found
-     * @return User New user
+     * @var str First time this group was seen on the originating network.
      */
-    public function __construct($val = false, $found_in = false) {
-        if ($val){
+    var $first_seen;
+    /**
+     * @var str Last time this group was seen on the originating network.
+     */
+    var $last_seen;
+    public function __construct($val = false) {
+        if ($val) {
             if (isset($val['id'])) {
                 $this->id = $val['id'];
             }
             $this->group_id = $val['group_id'];
+            $this->network = $val['network'];
             $this->group_name = $val['group_name'];
-            $this->found_in = $found_in;
-
-            if (isset($val['network'])) {
-                $this->network = $val['network'];
-            }
+            $this->is_active = PDODAO::convertDBToBool($val['is_active']);
+            $this->first_seen = $val['first_seen'];
+            $this->last_seen = $val['last_seen'];
         }
     }
-
 }
-

@@ -62,6 +62,8 @@ class TwitterPlugin extends Plugin implements CrawlerPlugin, DashboardPlugin, Po
         'fetchUserTimelineForRetweet' => array('percent' => 20), // fetchRetweetsOfInstanceUser->fetchStatusRetweets
         'cleanUpMissedFavsUnFavs' => array('percent' => 20),
         'cleanUpFollows' => array('percent' => 20),
+        'fetchInstanceUserGroups'  => array('percent' => 20),
+        'updateStaleGroupMemberships'  => array('percent' => 20),
     );
 
     public function __construct($vals = null) {
@@ -153,9 +155,9 @@ class TwitterPlugin extends Plugin implements CrawlerPlugin, DashboardPlugin, Po
                     $crawler->fetchInstanceUserFriends();
                     $crawler->fetchInstanceFavorites();
                     $crawler->fetchInstanceUserFollowers();
+                    $crawler->fetchRetweetsOfInstanceUser();
                     $crawler->fetchInstanceUserGroups();
                     $crawler->updateStaleGroupMemberships();
-                    $crawler->fetchRetweetsOfInstanceUser();
                     $crawler->cleanUpMissedFavsUnFavs();
                 }
 
@@ -317,19 +319,19 @@ class TwitterPlugin extends Plugin implements CrawlerPlugin, DashboardPlugin, Po
         $trendtab->addDataset($trendtabmonthds);
         $menus['followers-history'] = $trendtab;
 
-        //Group membership count history
-        $group_membership_history_tpl = Utils::getPluginViewDirectory('twitter').'twitter.groupmembershipcount.tpl';
-        $group_trend_tab = new MenuItem('Group membership history', 'Your list membership count over time',
-          $group_membership_history_tpl, 'Groups');
-        $group_trend_tab_ds = new Dataset("group_membership_count_history_by_day", 'GroupMembershipCountDAO', 'getHistory',
-          array($instance->network_user_id, 'twitter', 'DAY', 15));
+        //List membership count history
+        $group_membership_history_tpl = Utils::getPluginViewDirectory('twitter').'twitter.listmembershipcount.tpl';
+        $group_trend_tab = new MenuItem('List stats', 'Your list membership count over time',
+        $group_membership_history_tpl);
+        $group_trend_tab_ds = new Dataset("list_membership_count_history_by_day", 'GroupMembershipCountDAO',
+        'getHistory', array($instance->network_user_id, 'twitter', 'DAY', 15));
         $group_trend_tab->addDataset($group_trend_tab_ds);
-        $group_trend_tab_week_ds = new Dataset("group_membership_count_history_by_week", 'GroupMembershipCountDAO', 'getHistory',
-          array($instance->network_user_id, 'twitter', 'WEEK', 15));
+        $group_trend_tab_week_ds = new Dataset("list_membership_count_history_by_week", 'GroupMembershipCountDAO',
+        'getHistory', array($instance->network_user_id, 'twitter', 'WEEK', 15));
         $group_trend_tab->addDataset($group_trend_tab_week_ds);
-        $group_trend_tab_month_ds = new Dataset("group_membership_count_history_by_month", 'GroupMembershipCountDAO', 'getHistory',
-          array($instance->network_user_id, 'twitter', 'MONTH', 11));
-        // $group_trend_tab_month_ds->addHelp('userguide/listings/twitter/dashboard_group_membership-history');
+        $group_trend_tab_month_ds = new Dataset("list_membership_count_history_by_month", 'GroupMembershipCountDAO',
+        'getHistory', array($instance->network_user_id, 'twitter', 'MONTH', 11));
+        $group_trend_tab_month_ds->addHelp('userguide/listings/twitter/dashboard_followers-liststats');
         $group_trend_tab->addDataset($group_trend_tab_month_ds);
         $menus['group-membership-history'] = $group_trend_tab;
 

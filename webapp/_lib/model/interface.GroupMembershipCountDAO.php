@@ -20,37 +20,31 @@
  * You should have received a copy of the GNU General Public License along with ThinkUp.  If not, see
  * <http://www.gnu.org/licenses/>.
  *
- *
- * Group Membership Count MySQL Data Access Object Interface
- * (based on interface.FollowDAO.php)
+ * Group Membership Count Data Access Object Interface
  *
  * @license http://www.gnu.org/licenses/gpl.html
  * @copyright 2011 SwellPath, Inc.
  * @author Christian G. Warden <cwarden[at]xerus[dot]org>
  *
  */
-
 interface GroupMembershipCountDAO {
-
     /**
-     * Insert a count
+     * Insert a group count.
      * @param int $network_user_id
      * @param str $network
      * @param int $count
      * @return int Total inserted
      */
     public function insert($network_user_id, $network, $count);
-
     /**
-     * Record a count of active group memberships
+     * Update the count of active group memberships based on the group memberships in storage.
      * @param int $network_user_id
      * @param str $network
      * @return int Total inserted
      */
-    public function recordCurrentCount($network_user_id, $network);
-
+    public function updateCount($network_user_id, $network);
     /**
-     * Get group membership count history for a user
+     * Get group membership count history for a user.
      * @param int $network_user_id
      * @param str $network
      * @param str $units 'DAY', 'WEEK', 'MONTH'
@@ -58,5 +52,4 @@ interface GroupMembershipCountDAO {
      * @return array $history, $percentages
      */
     public function getHistory($network_user_id, $network, $units, $limit=10);
-
 }

@@ -27,18 +27,16 @@
  * @copyright 2011 SwellPath, Inc.
  * @author Christian G. Warden <cwarden[at]xerus[dot]org>
  */
-
 interface GroupMemberDAO {
     /**
-     * Checks weather a given group member exists in storage.
+     * Checks whether a given group member exists in storage.
      * @param int $user_id
      * @param int $group_id
      * @param str $network
-     * @param bool $is_active Whether or not relationship should be active only
-     * @return bool true if follow exists
+     * @param bool $is_active Whether or not member should be active only
+     * @return bool true if group member is in storage
      */
-    public function groupMemberExists($user_id, $group_id, $network, $is_active=false);
-
+    public function isGroupMemberInStorage($user_id, $group_id, $network, $is_active=false);
     /**
      * Updates 'last seen' in storage.
      * @param int $user_id
@@ -55,26 +53,23 @@ interface GroupMemberDAO {
      * @param str $network
      * @return int update count
      */
-    public function deactivate($user_id, $follower_id, $network);
-
+    public function deactivate($user_id, $group_id, $network);
     /**
-     * Adds a group membership to storage
+     * Adds a group membership to storage.
      * @param int $user_id
      * @param int $group_id
      * @param str $network
      * @return int insert count
      */
-    public function insert($user_id, $follower_id, $network);
-
+    public function insert($user_id, $group_id, $network);
     /**
-     * Count the total number of group membership in storage.
+     * Get the total number of group membership in storage for a given user.
      * @param int $user_id
      * @param str $network
      * @param bool $active
      * @return int the number
      */
-    public function countTotalGroups($user_id, $network, $active);
-
+    public function getTotalGroups($user_id, $network, $active);
     /**
      * Gets a list of inactive group memberships.
      * @param int $user_id
@@ -84,5 +79,4 @@ interface GroupMemberDAO {
      * @return array - numbered keys, with arrays - named keys
      */
     public function getFormerGroups($user_id, $network, $count = 20, $page = 1);
-
 }

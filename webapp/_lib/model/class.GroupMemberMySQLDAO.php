@@ -30,12 +30,12 @@
  *
  */
 class GroupMemberMySQLDAO extends PDODAO implements GroupMemberDAO {
-    public function groupMemberExists($user_id, $group_id, $network, $is_active=false) {
+    public function isGroupMemberInStorage($user_id, $group_id, $network, $is_active=false) {
         $q = "SELECT 1 ";
         $q .= "FROM #prefix#group_members ";
         $q .= "WHERE member_user_id = :user_id AND group_id = :group_id AND network = :network ";
         if ($is_active) {
-            $q .= "AND active=1";
+            $q .= "AND is_active=1";
         }
         $q .= ";";
         $vars = array(
@@ -52,7 +52,7 @@ class GroupMemberMySQLDAO extends PDODAO implements GroupMemberDAO {
     public function update($user_id, $group_id, $network) {
         $q = " UPDATE #prefix#group_members ";
         $q .= "SET last_seen=NOW(), ";
-        $q .= "active = 1 ";
+        $q .= "is_active = 1 ";
         $q .= "WHERE member_user_id = :user_id AND group_id = :group_id AND network = :network;";
         $vars = array(
             ':user_id'=>(string)$user_id,
@@ -67,7 +67,7 @@ class GroupMemberMySQLDAO extends PDODAO implements GroupMemberDAO {
 
     public function deactivate($user_id, $group_id, $network) {
         $q = "UPDATE #prefix#group_members ";
-        $q .= "SET active = 0 ";
+        $q .= "SET is_active = 0 ";
         $q .= "WHERE member_user_id = :user_id AND group_id = :group_id AND network = :network;";
         $vars = array(
             ':user_id'=>(string)$user_id,
@@ -95,11 +95,11 @@ class GroupMemberMySQLDAO extends PDODAO implements GroupMemberDAO {
         return $this->getInsertCount($ps);
     }
 
-    public function countTotalGroups($user_id, $network, $active = true) {
+    public function getTotalGroups($user_id, $network, $active = true) {
         $q = "SELECT count(g.group_id) AS count FROM #prefix#group_members AS g ";
         $q .= "WHERE g.member_user_id = :user_id AND g.network=:network ";
         if ($active) {
-            $q .= 'AND g.active = 1';
+            $q .= 'AND g.is_active = 1';
         }
         $vars = array(
             ':user_id'=>(string)$user_id,
@@ -116,7 +116,7 @@ class GroupMemberMySQLDAO extends PDODAO implements GroupMemberDAO {
 
         $q  = "SELECT g.group_id, g.group_name, g.network FROM #prefix#groups AS g ";
         $q .= "INNER JOIN #prefix#group_members AS m ON m.group_id = g.group_id AND g.network = m.network ";
-        $q .= "WHERE m.member_user_id = :user_id and m.network = :network AND m.active=0 ";
+        $q .= "WHERE m.member_user_id = :user_id and m.network = :network AND m.is_active=0 ";
         $q .= "ORDER BY g.id LIMIT :start_on_record, :count";
         $vars = array(
             ':user_id'=>(string)$user_id,
@@ -134,7 +134,7 @@ class GroupMemberMySQLDAO extends PDODAO implements GroupMemberDAO {
         $q  = "SELECT g.id, g.group_id, g.group_name, g.network, DATEDIFF(NOW(), m.last_seen) AS days_old ";
         $q .= "FROM #prefix#groups AS g ";
         $q .= "INNER JOIN #prefix#group_members AS m ON m.group_id = g.group_id AND g.network = m.network ";
-        $q .= "WHERE m.member_user_id = :user_id and m.network = :network AND m.active=1 ";
+        $q .= "WHERE m.member_user_id = :user_id and m.network = :network AND m.is_active=1 ";
         $q .= "AND m.last_seen < DATE_SUB(NOW(), INTERVAL 1 DAY) ";
         $q .= "ORDER BY days_old DESC LIMIT 1";
         $vars = array(
