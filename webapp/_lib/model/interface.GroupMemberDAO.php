@@ -69,7 +69,7 @@ interface GroupMemberDAO {
      * @param bool $active
      * @return int the number
      */
-    public function getTotalGroups($user_id, $network, $active);
+    public function getTotalGroups($user_id, $network, $active=true);
     /**
      * Gets a list of inactive group memberships.
      * @param int $user_id

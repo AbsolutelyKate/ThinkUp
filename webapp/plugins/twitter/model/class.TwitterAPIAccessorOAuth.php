@@ -55,7 +55,7 @@ class TwitterAPIAccessorOAuth {
      */
     var $oauth_access_token_secret;
     /**
-     * @var int
+     * @var str
      */
     var $next_cursor;
     /**
@@ -429,7 +429,8 @@ class TwitterAPIAccessorOAuth {
      * @return int
      */
     public function getNextCursor() {
-        return (int)$this->next_cursor;
+        //Don't cast this to an int; will break on extra large cursors in PHP 5.2
+        return $this->next_cursor;
     }
     /**
      * Create DOM from URL.

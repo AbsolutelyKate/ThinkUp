@@ -690,8 +690,9 @@ class TwitterCrawler {
 
                 $follower_ids = $this->api->cURL_source['followers'];
                 $args = array();
-                if (!isset($next_cursor))
-                $next_cursor = -1;
+                if (!isset($next_cursor)) {
+                    $next_cursor = -1;
+                }
                 $args['cursor'] = strval($next_cursor);
 
                 list($cURL_status, $twitter_data) = $this->api->apiRequest($follower_ids, $args);
@@ -818,8 +819,9 @@ class TwitterCrawler {
 
                 $groups = $this->api->cURL_source['groups'];
                 $args = array();
-                if (!isset($next_cursor))
-                $next_cursor = -1;
+                if (!isset($next_cursor)) {
+                    $next_cursor = -1;
+                }
                 $args['cursor'] = strval($next_cursor);
 
                 list($cURL_status, $twitter_data) = $this->api->apiRequest($groups, $args);
@@ -832,7 +834,7 @@ class TwitterCrawler {
                     $status_message .= "Cursor ".$next_cursor.":";
                     $groups = $this->api->parseXML($twitter_data);
                     $next_cursor = $this->api->getNextCursor();
-                    if ($next_cursor == 0) {
+                    if (!isset($next_cursor)) {
                         $continue_fetching = false;
                     }
                     $status_message .= count($groups)." groups queued to update. ";
