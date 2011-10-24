@@ -797,16 +797,10 @@ class PostMySQLDAO extends PDODAO implements PostDAO  {
         return $posts;
     }
 
-    /**
-     * Iterator wrapper for getPostsToUser
-     */
     public function getPostsToUserIterator($user_id, $network, $count, $is_public=false) {
         return $this->getPostsToUser($user_id, $network, $count, 1, $is_public, true);
     }
 
-    /**
-     * get the posts to the given user_id that are not replies, e.g. Facebook wall posts
-     */
     public function getPostsToUser($user_id, $network, $count = 15, $page = 1, $is_public = false,
     $iterator = false) {
         $start_on_record = ($page - 1) * $count;

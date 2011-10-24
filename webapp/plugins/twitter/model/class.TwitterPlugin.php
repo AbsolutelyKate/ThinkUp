@@ -252,7 +252,7 @@ class TwitterPlugin extends Plugin implements CrawlerPlugin, DashboardPlugin, Po
         $menus["tweets-convo"] = $convotab;
 
         // Messages to you
-        $messagestab = new MenuItem("Messages to you", "Messages other users sent you", $twitter_data_tpl);
+        $messagestab = new MenuItem("Tweets to you", "Tweets other users sent you", $twitter_data_tpl);
         $messagestabds = new Dataset("messages_to_you", 'PostDAO', "getPostsToUser",
         array($instance->network_user_id, $instance->network, 15, '#page_number#', !Session::isLoggedIn()),
         'getPostsToUserIterator', array($instance->network_user_id, $instance->network, GridController::getMaxRows()));
