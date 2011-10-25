@@ -197,184 +197,311 @@ class TwitterPlugin extends Plugin implements CrawlerPlugin, DashboardPlugin, Po
             $rt_plugin_active = $plugin_dao->isPluginActive($plugin_id);
         }
 
-        $twitter_data_tpl = Utils::getPluginViewDirectory('twitter').'twitter.inline.view.tpl';
         $menus = array();
-        //All tab
-        $all_mi = new MenuItem("All tweets", "All tweets", $twitter_data_tpl, "Tweets");
-        $all_mi_ds = new Dataset("all_tweets", 'PostDAO', "getAllPosts", array($instance->network_user_id,
-        'twitter', 15, "#page_number#"), 'getAllPostsIterator', array($instance->network_user_id, 'twitter', 
+
+        $tweets_data_tpl = Utils::getPluginViewDirectory('twitter').'tweets.tpl';
+
+        $tweets_menu_item = new MenuItem("Tweets", "Tweets insights", $tweets_data_tpl, "");
+
+        $tweets_menu_ds_1 = new Dataset("all_tweets", 'PostDAO', "getAllPosts", array($instance->network_user_id,
+        'twitter', 5, "#page_number#"), 'getAllPostsIterator', array($instance->network_user_id, 'twitter', 
         GridController::getMaxRows()) );
-        $all_mi_ds->addHelp('userguide/listings/twitter/dashboard_tweets-all');
-        $all_mi->addDataset($all_mi_ds);
-        $menus['tweets-all'] = $all_mi;
+        $tweets_menu_ds_1->addHelp('userguide/listings/twitter/dashboard_tweets-all');
+        $tweets_menu_item->addDataset($tweets_menu_ds_1);
+        $menus['tweets'] = $tweets_menu_item;
 
-        //Questions
-        $q_mi = new MenuItem("Inquiries", "Inquiries, or tweets with a question mark in them",
-        $twitter_data_tpl);
-        $q_mi_ds = new Dataset("all_tweets", 'PostDAO', "getAllQuestionPosts",
-        array($instance->network_user_id, 'twitter', 15, "#page_number#"));
-        $q_mi_ds->addHelp( 'userguide/listings/twitter/dashboard_tweets-questions');
-        $q_mi->addDataset($q_mi_ds);
-        $menus['tweets-questions'] = $q_mi;
+        $tweets_menu_ds_2 = new Dataset("inquiries", 'PostDAO', "getAllQuestionPosts",
+        array($instance->network_user_id, 'twitter', 5, "#page_number#"));
+        $tweets_menu_ds_2->addHelp( 'userguide/listings/twitter/dashboard_tweets-questions');
+        $tweets_menu_item->addDataset($tweets_menu_ds_2);
 
-        // Most replied-to
-        $mrt_mi = new MenuItem("Most replied-to", "Tweets with most replies", $twitter_data_tpl);
-        $mrt_mi_ds = new Dataset("most_replied_to_tweets", 'PostDAO', "getMostRepliedToPosts",
-        array($instance->network_user_id, 'twitter', 15, '#page_number#'));
-        $mrt_mi_ds->addHelp('userguide/listings/twitter/dashboard_tweets-mostreplies');
-        $mrt_mi->addDataset($mrt_mi_ds);
-        $menus['tweets-mostreplies'] = $mrt_mi;
+        $tweets_menu_ds_3 = new Dataset("most_replied_to_tweets", 'PostDAO', "getMostRepliedToPosts",
+        array($instance->network_user_id, 'twitter', 5, '#page_number#'));
+        $tweets_menu_ds_3->addHelp('userguide/listings/twitter/dashboard_tweets-mostreplies');
+        $tweets_menu_item->addDataset($tweets_menu_ds_3);
 
-        // Most shared
-        $mstab = new MenuItem("Most retweeted", "Most retweeted tweets", $twitter_data_tpl);
-        $mstabds = new Dataset("most_retweeted", 'PostDAO', "getMostRetweetedPosts",
-        array($instance->network_user_id, 'twitter', 15, '#page_number#'));
-        $mstabds->addHelp('userguide/listings/twitter/dashboard_tweets-mostretweeted');
-        $mstab->addDataset($mstabds);
-        $menus["tweets-mostretweeted"] = $mstab;
+        $tweets_menu_ds_7 = new Dataset("author_replies", 'PostDAO', "getPostsAuthorHasRepliedTo",
+        array($instance->network_user_id, 5, 'twitter', '#page_number#', !Session::isLoggedIn()));
+        $tweets_menu_ds_7->addHelp('userguide/listings/twitter/dashboard_tweets-convo');
+        $tweets_menu_item->addDataset($tweets_menu_ds_7);
 
-        if ($rt_plugin_active) {
-            // 'home timeline'
-            $tltab = new MenuItem("Timeline", "Your Timeline", $twitter_data_tpl);
-            $tltab2 = new Dataset("home_timeline", 'PostDAO', "getPostsByFriends",
-            array($instance->network_user_id, $instance->network, 20, '#page_number#', !Session::isLoggedIn()),
-            'getPostsByFriendsIterator', array($instance->network_user_id, 'twitter', GridController::getMaxRows()));
-            $tltab->addDataset($tltab2);
-            $menus["home-timeline"] = $tltab;
-        }
+        $tweets_menu_ds_4 = new Dataset("most_retweeted", 'PostDAO', "getMostRetweetedPosts",
+        array($instance->network_user_id, 'twitter', 5, '#page_number#'));
+        $tweets_menu_ds_4->addHelp('userguide/listings/twitter/dashboard_tweets-mostretweeted');
+        $tweets_menu_item->addDataset($tweets_menu_ds_4);
 
-        // Conversations
-        $convotab = new MenuItem("Conversations", "Exchanges between you and other users", $twitter_data_tpl);
-        $convotabds = new Dataset("author_replies", 'PostDAO', "getPostsAuthorHasRepliedTo",
-        array($instance->network_user_id, 15, 'twitter', '#page_number#', !Session::isLoggedIn()));
-        $convotabds->addHelp('userguide/listings/twitter/dashboard_tweets-convo');
-        $convotab->addDataset($convotabds);
-        $menus["tweets-convo"] = $convotab;
-
-        // Messages to you
-        $messagestab = new MenuItem("Tweets to you", "Tweets other users sent you", $twitter_data_tpl);
-        $messagestabds = new Dataset("messages_to_you", 'PostDAO', "getPostsToUser",
-        array($instance->network_user_id, $instance->network, 15, '#page_number#', !Session::isLoggedIn()),
+        $tweets_menu_ds_5 = new Dataset("messages_to_you", 'PostDAO', "getPostsToUser",
+        array($instance->network_user_id, $instance->network, 5, '#page_number#', !Session::isLoggedIn()),
         'getPostsToUserIterator', array($instance->network_user_id, $instance->network, GridController::getMaxRows()));
-        $messagestabds->addHelp('userguide/listings/twitter/dashboard_tweets-touser');
-        $messagestab->addDataset($messagestabds);
-        $menus["tweets-messages"] = $messagestab;
+        $tweets_menu_ds_5->addHelp('userguide/listings/twitter/dashboard_tweets-touser');
+        $tweets_menu_item->addDataset($tweets_menu_ds_5);
 
-        $fvalltab = new MenuItem("Favorites", "All your favorites", $twitter_data_tpl);
-        $fvalltabds = new Dataset("all_tweets", 'FavoritePostDAO', "getAllFavoritePosts",
-        array($instance->network_user_id, 'twitter', 20, "#page_number#", !Session::isLoggedIn()),
+        $tweets_menu_ds_6 = new Dataset("favorites", 'FavoritePostDAO', "getAllFavoritePosts",
+        array($instance->network_user_id, 'twitter', 5, "#page_number#", !Session::isLoggedIn()),
         'getAllFavoritePostsIterator',
         array($instance->network_user_id, 'twitter', GridController::getMaxRows()) );
-        $fvalltabds->addHelp('userguide/listings/twitter/dashboard_ftweets-all');
-        $fvalltab->addDataset($fvalltabds);
-        $menus["ftweets-all"] = $fvalltab;
+        $tweets_menu_ds_6->addHelp('userguide/listings/twitter/dashboard_ftweets-all');
+        $tweets_menu_item->addDataset($tweets_menu_ds_6);
 
-        //Most Active Friends
-        $motab = new MenuItem('Chatterboxes', 'People you follow who tweet the most',
-        $twitter_data_tpl, 'Who You Follow');
-        $motabds = new Dataset('people', 'FollowDAO', "getMostActiveFollowees", array(
-        $instance->network_user_id, 'twitter', 15, '#page_number#'));
-        $motabds->addHelp('userguide/listings/twitter/dashboard_friends-mostactive');
-        $motab->addDataset($motabds);
-        $menus["friends-mostactive"] = $motab;
+        $twitter_data_tpl = Utils::getPluginViewDirectory('twitter').'twitter.inline.view.tpl';
+        //
+        //        //All tab
+        //        $all_mi = new MenuItem("All tweets", "All tweets", $twitter_data_tpl, "Tweets");
+        //        $all_mi_ds = new Dataset("all_tweets", 'PostDAO', "getAllPosts", array($instance->network_user_id,
+        //        'twitter', 15, "#page_number#"), 'getAllPostsIterator', array($instance->network_user_id, 'twitter',
+        //        GridController::getMaxRows()) );
+        //        $all_mi_ds->addHelp('userguide/listings/twitter/dashboard_tweets-all');
+        //        $all_mi->addDataset($all_mi_ds);
+        //        $menus['tweets-all'] = $all_mi;
+        //
+        //        //Questions
+        //        $q_mi = new MenuItem("Inquiries", "Inquiries, or tweets with a question mark in them",
+        //        $twitter_data_tpl);
+        //        $q_mi_ds = new Dataset("all_tweets", 'PostDAO', "getAllQuestionPosts",
+        //        array($instance->network_user_id, 'twitter', 15, "#page_number#"));
+        //        $q_mi_ds->addHelp( 'userguide/listings/twitter/dashboard_tweets-questions');
+        //        $q_mi->addDataset($q_mi_ds);
+        //        $menus['tweets-questions'] = $q_mi;
+        //
+        //        // Most replied-to
+        //        $mrt_mi = new MenuItem("Most replied-to", "Tweets with most replies", $twitter_data_tpl);
+        //        $mrt_mi_ds = new Dataset("most_replied_to_tweets", 'PostDAO', "getMostRepliedToPosts",
+        //        array($instance->network_user_id, 'twitter', 15, '#page_number#'));
+        //        $mrt_mi_ds->addHelp('userguide/listings/twitter/dashboard_tweets-mostreplies');
+        //        $mrt_mi->addDataset($mrt_mi_ds);
+        //        $menus['tweets-mostreplies'] = $mrt_mi;
+        //
+        //        // Most shared
+        //        $mstab = new MenuItem("Most retweeted", "Most retweeted tweets", $twitter_data_tpl);
+        //        $mstabds = new Dataset("most_retweeted", 'PostDAO', "getMostRetweetedPosts",
+        //        array($instance->network_user_id, 'twitter', 15, '#page_number#'));
+        //        $mstabds->addHelp('userguide/listings/twitter/dashboard_tweets-mostretweeted');
+        //        $mstab->addDataset($mstabds);
+        //        $menus["tweets-mostretweeted"] = $mstab;
+        //
+        //        if ($rt_plugin_active) {
+        //            // 'home timeline'
+        //            $tltab = new MenuItem("Timeline", "Your Timeline", $twitter_data_tpl);
+        //            $tltab2 = new Dataset("home_timeline", 'PostDAO', "getPostsByFriends",
+        //            array($instance->network_user_id, $instance->network, 20, '#page_number#', !Session::isLoggedIn()),
+        //            'getPostsByFriendsIterator', array($instance->network_user_id, 'twitter', GridController::getMaxRows()));
+        //            $tltab->addDataset($tltab2);
+        //            $menus["home-timeline"] = $tltab;
+        //        }
+        //
+        //        // Conversations
+        //        $convotab = new MenuItem("Conversations", "Exchanges between you and other users", $twitter_data_tpl);
+        //        $convotabds = new Dataset("author_replies", 'PostDAO', "getPostsAuthorHasRepliedTo",
+        //        array($instance->network_user_id, 15, 'twitter', '#page_number#', !Session::isLoggedIn()));
+        //        $convotabds->addHelp('userguide/listings/twitter/dashboard_tweets-convo');
+        //        $convotab->addDataset($convotabds);
+        //        $menus["tweets-convo"] = $convotab;
+        //
+        //        // Messages to you
+        //        $messagestab = new MenuItem("Tweets to you", "Tweets other users sent you", $twitter_data_tpl);
+        //        $messagestabds = new Dataset("messages_to_you", 'PostDAO', "getPostsToUser",
+        //        array($instance->network_user_id, $instance->network, 15, '#page_number#', !Session::isLoggedIn()),
+        //        'getPostsToUserIterator', array($instance->network_user_id, $instance->network, GridController::getMaxRows()));
+        //        $messagestabds->addHelp('userguide/listings/twitter/dashboard_tweets-touser');
+        //        $messagestab->addDataset($messagestabds);
+        //        $menus["tweets-messages"] = $messagestab;
+        //
+        //        $fvalltab = new MenuItem("Favorites", "All your favorites", $twitter_data_tpl);
+        //        $fvalltabds = new Dataset("all_tweets", 'FavoritePostDAO', "getAllFavoritePosts",
+        //        array($instance->network_user_id, 'twitter', 20, "#page_number#", !Session::isLoggedIn()),
+        //        'getAllFavoritePostsIterator',
+        //        array($instance->network_user_id, 'twitter', GridController::getMaxRows()) );
+        //        $fvalltabds->addHelp('userguide/listings/twitter/dashboard_ftweets-all');
+        //        $fvalltab->addDataset($fvalltabds);
+        //        $menus["ftweets-all"] = $fvalltab;
 
-        //Least Active Friends
-        $latab = new MenuItem('Deadbeats', 'People you follow who tweet the least', $twitter_data_tpl);
-        $latabds = new Dataset("people", 'FollowDAO', "getLeastActiveFollowees", array(
-        $instance->network_user_id, 'twitter', 15, '#page_number#'));
-        $latabds->addHelp('userguide/listings/twitter/dashboard_friends-leastactive');
-        $latab->addDataset($latabds);
-        $menus["friends-leastactive"] = $latab;
+        $who_you_follow_data_tpl = Utils::getPluginViewDirectory('twitter').'who_you_follow.tpl';
 
-        //Popular friends
-        $poptab = new MenuItem('Popular', 'Most-followed people you follow', $twitter_data_tpl);
-        $poptabds = new Dataset("people", 'FollowDAO', "getMostFollowedFollowees", array(
-        $instance->network_user_id, 'twitter', 15, '#page_number#'));
-        $poptabds->addHelp('userguide/listings/twitter/dashboard_followers-mostfollowed');
-        $poptab->addDataset($poptabds);
-        $menus["friends-mostfollowed"] = $poptab;
+        $who_you_follow_menu_item = new MenuItem("Who You Follow", "Friend insights", $who_you_follow_data_tpl, "");
+        $menus['you-follow'] = $who_you_follow_menu_item;
 
-        //Least likely/Most Discerning
-        $lltab = new MenuItem("Discerning", 'Followers with the greatest follower-to-friend ratio',
-        $twitter_data_tpl, 'Followers');
-        $lltabds = new Dataset("people", 'FollowDAO', "getLeastLikelyFollowers", array(
-        $instance->network_user_id, 'twitter', 15, '#page_number#'));
-        $lltabds->addHelp('userguide/listings/twitter/dashboard_followers-leastlikely');
-        $lltab->addDataset($lltabds);
-        $menus["followers-leastlikely"] = $lltab;
+        $you_follow_ds1 = new Dataset('chatterboxes', 'FollowDAO', "getMostActiveFollowees", array(
+        $instance->network_user_id, 'twitter', 13, '#page_number#'));
+        $you_follow_ds1->addHelp('userguide/listings/twitter/dashboard_friends-mostactive');
+        $who_you_follow_menu_item->addDataset($you_follow_ds1);
 
-        //Most followed
-        $mftab = new MenuItem('Popular', 'Followers with the most followers',
-        $twitter_data_tpl);
-        $mftabds = new Dataset("people", 'FollowDAO', "getMostFollowedFollowers", array(
-        $instance->network_user_id, 'twitter', 15, '#page_number#'));
-        $mftabds->addHelp('userguide/listings/twitter/dashboard_followers-mostfollowed');
-        $mftab->addDataset($mftabds);
-        $menus["followers-mostfollowed"] =  $mftab;
+        $you_follow_ds2 = new Dataset("deadbeats", 'FollowDAO', "getLeastActiveFollowees", array(
+        $instance->network_user_id, 'twitter', 13, '#page_number#'));
+        $you_follow_ds2->addHelp('userguide/listings/twitter/dashboard_friends-leastactive');
+        $who_you_follow_menu_item->addDataset($you_follow_ds2);
 
-        //Follower count history
-        $follower_history_tpl = Utils::getPluginViewDirectory('twitter').'twitter.followercount.tpl';
-        $trendtab = new MenuItem('Count history', 'Your follower count over time',
-        $follower_history_tpl);
-        $trendtabds = new Dataset("follower_count_history_by_day", 'FollowerCountDAO', 'getHistory',
+        $you_follow_ds3 = new Dataset("popular", 'FollowDAO', "getMostFollowedFollowees", array(
+        $instance->network_user_id, 'twitter', 13, '#page_number#'));
+        $you_follow_ds3->addHelp('userguide/listings/twitter/dashboard_followers-mostfollowed');
+        $who_you_follow_menu_item->addDataset($you_follow_ds3);
+
+        //        //Most Active Friends
+        //        $motab = new MenuItem('Chatterboxes', 'People you follow who tweet the most',
+        //        $twitter_data_tpl, 'Who You Follow');
+        //        $motabds = new Dataset('people', 'FollowDAO', "getMostActiveFollowees", array(
+        //        $instance->network_user_id, 'twitter', 15, '#page_number#'));
+        //        $motabds->addHelp('userguide/listings/twitter/dashboard_friends-mostactive');
+        //        $motab->addDataset($motabds);
+        //        $menus["friends-mostactive"] = $motab;
+        //
+        //        //Least Active Friends
+        //        $latab = new MenuItem('Deadbeats', 'People you follow who tweet the least', $twitter_data_tpl);
+        //        $latabds = new Dataset("people", 'FollowDAO', "getLeastActiveFollowees", array(
+        //        $instance->network_user_id, 'twitter', 15, '#page_number#'));
+        //        $latabds->addHelp('userguide/listings/twitter/dashboard_friends-leastactive');
+        //        $latab->addDataset($latabds);
+        //        $menus["friends-leastactive"] = $latab;
+        //
+        //        //Popular friends
+        //        $poptab = new MenuItem('Popular', 'Most-followed people you follow', $twitter_data_tpl);
+        //        $poptabds = new Dataset("people", 'FollowDAO', "getMostFollowedFollowees", array(
+        //        $instance->network_user_id, 'twitter', 15, '#page_number#'));
+        //        $poptabds->addHelp('userguide/listings/twitter/dashboard_followers-mostfollowed');
+        //        $poptab->addDataset($poptabds);
+        //        $menus["friends-mostfollowed"] = $poptab;
+
+        $follower_data_tpl = Utils::getPluginViewDirectory('twitter').'followers.tpl';
+
+        $followers_menu_item = new MenuItem("Followers", "Follower insights", $follower_data_tpl, "");
+        $menus['followers'] = $followers_menu_item;
+
+        $followers_ds1 = new Dataset('leastlikely', 'FollowDAO', "getLeastLikelyFollowers", array(
+        $instance->network_user_id, 'twitter', 13, '#page_number#'));
+        $followers_ds1->addHelp('userguide/listings/twitter/dashboard_friends-mostactive');
+        $followers_menu_item->addDataset($followers_ds1);
+
+        $followers_ds2 = new Dataset("popular", 'FollowDAO', "getMostFollowedFollowers", array(
+        $instance->network_user_id, 'twitter', 13, '#page_number#'));
+        $followers_ds2->addHelp('userguide/listings/twitter/dashboard_followers-mostfollowed');
+        $followers_menu_item->addDataset($followers_ds2);
+
+        $followers_ds3 = new Dataset("follower_count_history_by_day", 'FollowerCountDAO', 'getHistory',
         array($instance->network_user_id, 'twitter', 'DAY', 15));
-        $trendtab->addDataset($trendtabds);
-        $trendtabweekds = new Dataset("follower_count_history_by_week", 'FollowerCountDAO', 'getHistory',
+        $followers_menu_item->addDataset($followers_ds3);
+
+        $followers_ds4 = new Dataset("follower_count_history_by_week", 'FollowerCountDAO', 'getHistory',
         array($instance->network_user_id, 'twitter', 'WEEK', 15));
-        $trendtab->addDataset($trendtabweekds);
-        $trendtabmonthds = new Dataset("follower_count_history_by_month", 'FollowerCountDAO', 'getHistory',
+        $followers_menu_item->addDataset($followers_ds4);
+
+        $followers_ds5 = new Dataset("follower_count_history_by_month", 'FollowerCountDAO', 'getHistory',
         array($instance->network_user_id, 'twitter', 'MONTH', 11));
-        $trendtabmonthds->addHelp('userguide/listings/twitter/dashboard_followers-history');
-        $trendtab->addDataset($trendtabmonthds);
-        $menus['followers-history'] = $trendtab;
+        $followers_ds5->addHelp('userguide/listings/twitter/dashboard_followers-history');
+        $followers_menu_item->addDataset($followers_ds5);
 
-        //List membership count history
-        $group_membership_history_tpl = Utils::getPluginViewDirectory('twitter').'twitter.listmembershipcount.tpl';
-        $group_trend_tab = new MenuItem('List stats', 'Your list membership count over time',
-        $group_membership_history_tpl);
-        $group_trend_tab_ds = new Dataset("list_membership_count_history_by_day", 'GroupMembershipCountDAO',
+        $followers_ds6 = new Dataset("list_membership_count_history_by_day", 'GroupMembershipCountDAO',
         'getHistory', array($instance->network_user_id, 'twitter', 'DAY', 15));
-        $group_trend_tab->addDataset($group_trend_tab_ds);
-        $group_trend_tab_week_ds = new Dataset("list_membership_count_history_by_week", 'GroupMembershipCountDAO',
+        $followers_menu_item->addDataset($followers_ds6);
+
+        $followers_ds7 = new Dataset("list_membership_count_history_by_week", 'GroupMembershipCountDAO',
         'getHistory', array($instance->network_user_id, 'twitter', 'WEEK', 15));
-        $group_trend_tab->addDataset($group_trend_tab_week_ds);
-        $group_trend_tab_month_ds = new Dataset("list_membership_count_history_by_month", 'GroupMembershipCountDAO',
+        $followers_menu_item->addDataset($followers_ds7);
+
+        $followers_ds8 = new Dataset("list_membership_count_history_by_month", 'GroupMembershipCountDAO',
         'getHistory', array($instance->network_user_id, 'twitter', 'MONTH', 11));
-        $group_trend_tab_month_ds->addHelp('userguide/listings/twitter/dashboard_followers-liststats');
-        $group_trend_tab->addDataset($group_trend_tab_month_ds);
-        $menus['group-membership-history'] = $group_trend_tab;
+        $followers_ds8->addHelp('userguide/listings/twitter/dashboard_followers-liststats');
+        $followers_menu_item->addDataset($followers_ds8);
 
-        if ($rt_plugin_active) {
-            $fvdtab = new MenuItem("Favorited by Others", "Favorited by Others", $twitter_data_tpl);
-            $ftab2 = new Dataset("all_favd", 'FavoritePostDAO', "getAllFavoritedPosts",
-            array($instance->network_user_id, $instance->network, 20, '#page_number#'));
-            $fvdtab->addDataset($ftab2);
-            $menus["favd-all"] = $fvdtab;
-        }
+        //        //Least likely/Most Discerning
+        //        $lltab = new MenuItem("Discerning", 'Followers with the greatest follower-to-friend ratio',
+        //        $twitter_data_tpl, 'Followers');
+        //        $lltabds = new Dataset("people", 'FollowDAO', "getLeastLikelyFollowers", array(
+        //        $instance->network_user_id, 'twitter', 15, '#page_number#'));
+        //        $lltabds->addHelp('userguide/listings/twitter/dashboard_followers-leastlikely');
+        //        $lltab->addDataset($lltabds);
+        //        $menus["followers-leastlikely"] = $lltab;
+        //
+        //        //Most followed
+        //        $mftab = new MenuItem('Popular', 'Followers with the most followers',
+        //        $twitter_data_tpl);
+        //        $mftabds = new Dataset("people", 'FollowDAO', "getMostFollowedFollowers", array(
+        //        $instance->network_user_id, 'twitter', 15, '#page_number#'));
+        //        $mftabds->addHelp('userguide/listings/twitter/dashboard_followers-mostfollowed');
+        //        $mftab->addDataset($mftabds);
+        //        $menus["followers-mostfollowed"] =  $mftab;
+        //
+        //        //Follower count history
+        //        $follower_history_tpl = Utils::getPluginViewDirectory('twitter').'twitter.followercount.tpl';
+        //        $trendtab = new MenuItem('Count history', 'Your follower count over time',
+        //        $follower_history_tpl);
+        //        $trendtabds = new Dataset("follower_count_history_by_day", 'FollowerCountDAO', 'getHistory',
+        //        array($instance->network_user_id, 'twitter', 'DAY', 15));
+        //        $trendtab->addDataset($trendtabds);
+        //        $trendtabweekds = new Dataset("follower_count_history_by_week", 'FollowerCountDAO', 'getHistory',
+        //        array($instance->network_user_id, 'twitter', 'WEEK', 15));
+        //        $trendtab->addDataset($trendtabweekds);
+        //        $trendtabmonthds = new Dataset("follower_count_history_by_month", 'FollowerCountDAO', 'getHistory',
+        //        array($instance->network_user_id, 'twitter', 'MONTH', 11));
+        //        $trendtabmonthds->addHelp('userguide/listings/twitter/dashboard_followers-history');
+        //        $trendtab->addDataset($trendtabmonthds);
+        //        $menus['followers-history'] = $trendtab;
+        //
+        //        //List membership count history
+        //        $group_membership_history_tpl = Utils::getPluginViewDirectory('twitter').'twitter.listmembershipcount.tpl';
+        //        $group_trend_tab = new MenuItem('List stats', 'Your list membership count over time',
+        //        $group_membership_history_tpl);
+        //        $group_trend_tab_ds = new Dataset("list_membership_count_history_by_day", 'GroupMembershipCountDAO',
+        //        'getHistory', array($instance->network_user_id, 'twitter', 'DAY', 15));
+        //        $group_trend_tab->addDataset($group_trend_tab_ds);
+        //        $group_trend_tab_week_ds = new Dataset("list_membership_count_history_by_week", 'GroupMembershipCountDAO',
+        //        'getHistory', array($instance->network_user_id, 'twitter', 'WEEK', 15));
+        //        $group_trend_tab->addDataset($group_trend_tab_week_ds);
+        //        $group_trend_tab_month_ds = new Dataset("list_membership_count_history_by_month", 'GroupMembershipCountDAO',
+        //        'getHistory', array($instance->network_user_id, 'twitter', 'MONTH', 11));
+        //        $group_trend_tab_month_ds->addHelp('userguide/listings/twitter/dashboard_followers-liststats');
+        //        $group_trend_tab->addDataset($group_trend_tab_month_ds);
+        //        $menus['group-membership-history'] = $group_trend_tab;
+        //
+        //        if ($rt_plugin_active) {
+        //            $fvdtab = new MenuItem("Favorited by Others", "Favorited by Others", $twitter_data_tpl);
+        //            $ftab2 = new Dataset("all_favd", 'FavoritePostDAO', "getAllFavoritedPosts",
+        //            array($instance->network_user_id, $instance->network, 20, '#page_number#'));
+        //            $fvdtab->addDataset($ftab2);
+        //            $menus["favd-all"] = $fvdtab;
+        //        }
 
-        //Links from favorites
-        $lftab = new MenuItem('Links in favorites', 'Links in posts you favorited', $twitter_data_tpl, 'Links');
-        $lftabds = new Dataset("links", 'LinkDAO', "getLinksByFavorites",
-        array($instance->network_user_id, 'twitter', 15, '#page_number#',!Session::isLoggedIn()));
-        $lftabds->addHelp('userguide/listings/twitter/dashboard_links-favorites');
-        $lftab->addDataset($lftabds);
-        $menus["links-favorites"] = $lftab;
+        $links_data_tpl = Utils::getPluginViewDirectory('twitter').'links.tpl';
 
-        //Links from friends
-        $fltab = new MenuItem('Links by who you follow', 'Links your friends posted', $twitter_data_tpl);
-        $fltabds = new Dataset("links", 'LinkDAO', "getLinksByFriends",
-        array($instance->network_user_id, 'twitter', 15, '#page_number#',!Session::isLoggedIn()));
-        $fltabds->addHelp('userguide/listings/twitter/dashboard_links-friends');
-        $fltab->addDataset($fltabds);
-        $menus["links-friends"] = $fltab;
+        $links_menu_item = new MenuItem("Links", "Links insights", $links_data_tpl, "");
+        $menus['links'] = $links_menu_item;
 
-        //Photos
-        $ptab = new MenuItem("Photos by who you follow", 'Photos your friends have posted', $twitter_data_tpl);
-        $ptabds = new Dataset("links", 'LinkDAO', "getPhotosByFriends",
-        array($instance->network_user_id, 'twitter', 15, '#page_number#',!Session::isLoggedIn()));
-        $ptabds->addHelp('userguide/listings/twitter/dashboard_links-photos');
-        $ptab->addDataset($ptabds);
-        $menus["links-photos"] = $ptab;
+        $links_ds_1 = new Dataset("linksinfaves", 'LinkDAO', "getLinksByFavorites",
+        array($instance->network_user_id, 'twitter', 5, '#page_number#',!Session::isLoggedIn()));
+        $links_ds_1->addHelp('userguide/listings/twitter/dashboard_links-favorites');
+        $links_menu_item->addDataset($links_ds_1);
+
+        $links_ds_2 = new Dataset("linksbyfriends", 'LinkDAO', "getLinksByFriends",
+        array($instance->network_user_id, 'twitter', 5, '#page_number#',!Session::isLoggedIn()));
+        $links_ds_2->addHelp('userguide/listings/twitter/dashboard_links-friends');
+        $links_menu_item->addDataset($links_ds_2);
+
+        $links_ds_3 = new Dataset("photosbyfriends", 'LinkDAO', "getPhotosByFriends",
+        array($instance->network_user_id, 'twitter', 5, '#page_number#',!Session::isLoggedIn()));
+        $links_ds_3->addHelp('userguide/listings/twitter/dashboard_links-photos');
+        $links_menu_item->addDataset($links_ds_3);
+
+//        //Links from favorites
+//        $lftab = new MenuItem('Links in favorites', 'Links in posts you favorited', $twitter_data_tpl, 'Links');
+//        $lftabds = new Dataset("links", 'LinkDAO', "getLinksByFavorites",
+//        array($instance->network_user_id, 'twitter', 15, '#page_number#',!Session::isLoggedIn()));
+//        $lftabds->addHelp('userguide/listings/twitter/dashboard_links-favorites');
+//        $lftab->addDataset($lftabds);
+//        $menus["links-favorites"] = $lftab;
+//
+//        //Links from friends
+//        $fltab = new MenuItem('Links by who you follow', 'Links your friends posted', $twitter_data_tpl);
+//        $fltabds = new Dataset("links", 'LinkDAO', "getLinksByFriends",
+//        array($instance->network_user_id, 'twitter', 15, '#page_number#',!Session::isLoggedIn()));
+//        $fltabds->addHelp('userguide/listings/twitter/dashboard_links-friends');
+//        $fltab->addDataset($fltabds);
+//        $menus["links-friends"] = $fltab;
+//
+//        //Photos
+//        $ptab = new MenuItem("Photos by who you follow", 'Photos your friends have posted', $twitter_data_tpl);
+//        $ptabds = new Dataset("links", 'LinkDAO', "getPhotosByFriends",
+//        array($instance->network_user_id, 'twitter', 15, '#page_number#',!Session::isLoggedIn()));
+//        $ptabds->addHelp('userguide/listings/twitter/dashboard_links-photos');
+//        $ptab->addDataset($ptabds);
+//        $menus["links-photos"] = $ptab;
 
         return $menus;
     }
