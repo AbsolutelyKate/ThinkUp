@@ -19,15 +19,17 @@
         {/if}
         {if $sidebar_menu}
           {foreach from=$sidebar_menu key=smkey item=sidebar_menu_item name=smenuloop}
+          {if !$sidebar_menu_item->parent}
             {if $sidebar_menu_item->header}
-            </ul>
-          </li>
-        <li>{$sidebar_menu_item->header}
-        <ul class="side-subnav">
-        {/if}
-        <li{if $smarty.get.v eq $smkey} class="currentview"{/if}>
-        <a href="{$site_root_path}index.php?v={$smkey}&u={$instance->network_username|urlencode}&n={$instance->network|urlencode}">{$sidebar_menu_item->name}</a></li>
-        {/foreach}
+                    </ul>
+                  </li>
+                <li>{$sidebar_menu_item->header}
+                <ul class="side-subnav">
+                {/if}
+                <li{if $smarty.get.v eq $smkey OR $parent eq $smkey} class="currentview"{/if}>
+                <a href="{$site_root_path}index.php?v={$smkey}&u={$instance->network_username|urlencode}&n={$instance->network|urlencode}">{$sidebar_menu_item->name}</a></li>
+             {/if}
+            {/foreach}
         </ul>
         </li>
         </ul>
@@ -65,14 +67,6 @@
 
           {if $data_template}
             {include file=$data_template}
-            <div class="float-l" id="older-posts-div">
-              {if $next_page}
-                <a href="{$site_root_path}index.php?{if $smarty.get.v}v={$smarty.get.v}&{/if}{if $smarty.get.u}u={$smarty.get.u}&{/if}{if $smarty.get.n}n={$smarty.get.n|urlencode}&{/if}page={$next_page}" id="next_page">&#60; Older Posts</a>
-              {/if}
-              {if $last_page}
-                | <a href="{$site_root_path}index.php?{if $smarty.get.v}v={$smarty.get.v}&{/if}{if $smarty.get.u}u={$smarty.get.u}&{/if}{if $smarty.get.n}n={$smarty.get.n|urlencode}&{/if}page={$last_page}" id="last_page">Newer Posts  &#62;</a>
-              {/if}
-            </div>
           {else} <!-- else if $data_template -->
             {if $hot_posts|@count > 3}
               <h2>Hot Posts</h2>

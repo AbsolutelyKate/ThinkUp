@@ -5,8 +5,8 @@
         <a href="http://twitter.com/{$u.user_name}" title="{$u.user_name}"><img src="{$u.avatar}" class="avatar2"/><img src="{$site_root_path}plugins/{$u.network}/assets/img/favicon.ico" class="service-icon2"/></a>
       </div>
     {/foreach}
+    <div align="right" style="clear:all;padding-top:60px"><a href="index.php?v=followers-leastlikely&u={$instance->network_username}&n=twitter">More...</a></div>
 {/if}
-<br><br><br>
 
 {if $popular|@count >1}
     <h2>Most Popular</h2>
@@ -15,6 +15,7 @@
         <a href="http://twitter.com/{$u.user_name}" title="{$u.user_name}"><img src="{$u.avatar}" class="avatar2"/><img src="{$site_root_path}plugins/{$u.network}/assets/img/favicon.ico" class="service-icon2"/></a>
       </div>
     {/foreach}
+    <div align="right" style="clear:all;padding-top:60px"><a href="index.php?v=followers-mostfollowed&u={$instance->network_username}&n=twitter">More...</a></div>
 {/if}
 <br><br><br>
 
