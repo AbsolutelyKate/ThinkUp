@@ -1,9 +1,13 @@
-<div class="append_20">
-<h2 class="subhead">Twitter Plugin {insert name="help_link" id='twitter'}</h2>
+{include file="_usermessage.tpl"}
 
+<div class="append_20 alert helpful">
+{insert name="help_link" id='twitter'}
+<h2>Twitter Plugin </h2>
+
+<div class="">
 <p>The Twitter plugin captures and displays tweets, replies, mentions, retweets, friends, followers, favorites, links, and photos.</p>
 
-{include file="_usermessage.tpl"}
+</div>
 
 {if $oauthorize_link}
 <br>

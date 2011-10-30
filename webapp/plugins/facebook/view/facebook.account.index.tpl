@@ -1,26 +1,37 @@
-<div class="append_20">
-<h2 class="subhead">Facebook Plugin {insert name="help_link" id='facebook'}</h2>
 
-<p>The Facebook plugin collects posts and status updates for Facebook users and the Facebook pages those users like.</p>
+{include file="_usermessage.tpl"}
+    
+<div class="append_20 alert helpful">
+    {insert name="help_link" id='facebook'}
+    <h2>Facebook Plugin</h2>
+    
+    <div class="">
+    <p>The Facebook plugin collects posts and status updates for Facebook users and the Facebook pages those users like.</p>
+    
+    </div>
+    
 
-    {include file="_usermessage.tpl"}
+</div>
+
 
 <div id="add-account-div" style="display: none;">
+<br />
     {if $fbconnect_link}
 <br>
      {include file="_usermessage.tpl" field="authorization"}
 <a href="{$fbconnect_link}" class="tt-button ui-state-default tt-button-icon-right ui-corner-all"><span class="ui-icon ui-icon-circle-arrow-e"></span>Add a Facebook User</a>
-<div style="clear:all">&nbsp;<br><br><br></div>
     {/if}
-    <div>
-    </div>
+    
 </div>
 
+{if count($owner_instances) > 0 }{include file="_usermessage.tpl" field="user_add"}{/if}
+
 {if count($owner_instances) > 0 }
-    <h2 class="subhead">Facebook User Profiles</h2>
-     {include file="_usermessage.tpl" field="user_add"}
+<div class="section">
+    <h2>Facebook User Profiles</h2>
+
     {foreach from=$owner_instances key=iid item=i name=foo}
-    <div class="clearfix">
+    <div class="clearfix article">
         <div class="grid_4 right" style="padding-top:.5em;">
             <a href="{$site_root_path}index.php?u={$i->network_username|urlencode}&n={$i->network|urlencode}">{$i->network_username}</a> 
         </div>
@@ -37,13 +48,16 @@
         </div>
     </div>
     {/foreach}
-    <br />
+</div>
+
+    {if isset($owner_instance_pages) && count($owner_instance_pages) > 0 }{include file="_usermessage.tpl" field="page_add"}{/if}
+
+<div class="section">
 
     {if isset($owner_instance_pages) && count($owner_instance_pages) > 0 }
-    <h2 class="subhead">Facebook Pages</h2>
-    {include file="_usermessage.tpl" field="page_add"}
+    <h2>Facebook Pages</h2>
     {foreach from=$owner_instance_pages key=iid item=i name=foo}
-    <div class="clearfix">
+    <div class="clearfix article">
         <div class="grid_4 right" style="padding-top:.5em;">
             <a href="{$site_root_path}index.php?u={$i->network_username|urlencode}&n={$i->network|urlencode}">{$i->network_username}</a> 
         </div>
@@ -60,14 +74,15 @@
         </div>
 
     </div>{/foreach}
-    <br />
     {/if}
+</div>
 
-<h2 class="subhead">Add a Facebook Page</h2>
+<div class="section">
+<h2>Add a Facebook Page</h2>
 {foreach from=$owner_instances key=iid item=i name=foo}
   {assign var='facebook_user_id' value=$i->network_user_id}
   {if $user_pages.$facebook_user_id or $user_admin_pages.$facebook_user_id}
-    <div class="clearfix">
+    <div class="clearfix article">
         <div class="grid_4 right" style="padding-top:.5em;">
             {$i->network_username}&nbsp;likes:
         </div>
@@ -101,12 +116,14 @@ addPage"  id="{$i->network_username}" value="add page" /></span>
         </form>
     </div>
     {else}
+    <div class="article">
     To add a Facebook page to ThinkUp, create a new page on Facebook.com or "like" an existing one, and refresh this page.
+    </div>
     {/if}
 {/foreach}
 
 {/if}
-</div> 
+</div>
 
 <div id="contact-admin-div" style="display: none;">
 {include file="_plugin.admin-request.tpl"}
@@ -180,4 +197,3 @@ if( required_values_set ) {
 }
 {/literal}
 </script>
-
